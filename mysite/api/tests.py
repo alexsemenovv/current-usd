@@ -1,11 +1,10 @@
 from unittest.mock import patch
 
+from api.models import ExchangeRate
 from django.core.cache import cache
 from django.http import HttpResponseBadRequest
-from django.test import TestCase, Client
+from django.test import Client, TestCase
 from django.urls import reverse
-
-from api.models import ExchangeRate
 
 
 class CurrentUsdTestCase(TestCase):
@@ -17,11 +16,7 @@ class CurrentUsdTestCase(TestCase):
     @patch("requests.get")
     def test_successful_api_call_creates_rate_and_returns_json(self, mock_get):
         """Тест на успешный статус код и нахождение полей: rate и last_10_rate - в ответе"""
-        mock_response = {
-            "Valute": {
-                "USD": {"Value": 92.34}
-            }
-        }
+        mock_response = {"Valute": {"USD": {"Value": 92.34}}}
         mock_get.return_value.status_code = 200
         mock_get.return_value.json.return_value = mock_response
 
@@ -36,11 +31,7 @@ class CurrentUsdTestCase(TestCase):
     @patch("requests.get")
     def test_cache_is_used_on_second_request(self, mock_get):
         """Тест на проверку работы кёша при повторном запросе"""
-        mock_response = {
-            "Valute": {
-                "USD": {"Value": 91.11}
-            }
-        }
+        mock_response = {"Valute": {"USD": {"Value": 91.11}}}
         mock_get.return_value.status_code = 200
         mock_get.return_value.json.return_value = mock_response
 
@@ -65,9 +56,7 @@ class CurrentUsdTestCase(TestCase):
     def test_last_10_rates_limit(self, mock_get):
         """Тест на проверку получения 10 последних записей"""
         mock_get.return_value.status_code = 200
-        mock_get.return_value.json.return_value = {
-            "Valute": {"USD": {"Value": 90.0}}
-        }
+        mock_get.return_value.json.return_value = {"Valute": {"USD": {"Value": 90.0}}}
 
         for _ in range(12):
             cache.clear()
