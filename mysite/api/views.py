@@ -1,7 +1,6 @@
 import requests
 from django.core.cache import cache
-from django.core.exceptions import BadRequest
-from django.http import HttpRequest, HttpResponse, JsonResponse
+from django.http import HttpRequest, HttpResponse, JsonResponse, HttpResponseBadRequest
 
 from .models import ExchangeRate
 
@@ -15,7 +14,7 @@ def get_current_usd(request: HttpRequest) -> HttpResponse:
     if data is None:
         response = requests.get(BASE_URL)
         if response.status_code != 200:
-            raise BadRequest(f"Сервер временно недоступен. Код ошибки: {response.status_code}")
+            raise HttpResponseBadRequest(f"Сервер временно недоступен. Код ошибки: {response.status_code}")
         rate = response.json().get("Valute", {}).get("USD", {}).get("Value")
         obj = ExchangeRate.objects.create(rate=rate)
         obj.save()
